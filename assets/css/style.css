@@ -1,0 +1,13 @@
+header {
+    padding: 24px 0;
+}
+
+h1 {
+    margin: 0;
+}
+
+.caption {
+    font-size: 1.25rem;
+    font-weight: 300;
+    margin-bottom: 30px;
+}
