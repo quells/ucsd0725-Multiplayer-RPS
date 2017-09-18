@@ -99,7 +99,7 @@
         var requestPending = false; var requestPendingFrom;
 
         function Main() {
-            $(".modal").modal();
+            $(".modal").modal({ dismissible: false });
             databaseHandler = new DatabaseHandler(UpdateOtherPlayersOutlet, NewRequestCallback);
 
             var welcomeText = "Welcome " + ParsePlayerName(databaseHandler.playerName) + "!";
@@ -111,6 +111,7 @@
             });
 
             $(".btn-challenge").click(function() {
+                requestPending = false;
                 console.log($(this).data("uid"), $(this).attr("id"));
             });
         };
@@ -170,10 +171,9 @@
                 var challenger = otherPlayers[challengerID];
                 if (challenger !== undefined) {
                     requestPending = true;
-                    var modal = $("#challenge");
                     $("#challenge > .modal-content > h4").text(ParsePlayerName(challenger) + " has challenged you to a match!");
                     $(".btn-challenge").data("uid", challengerID);
-                    modal.modal("open");
+                    $("#challenge").modal("open");
                     break;
                 }
             }
