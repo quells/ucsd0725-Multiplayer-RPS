@@ -71,11 +71,11 @@
 
             <div id="challenge" class="modal bottom-sheet">
                 <div class="modal-content">
-                    <h4>Purple Iguana has challenged you to a match!</h4>
+                    <h4></h4>
                 </div>
                 <div class="modal-footer">
-                    <a href="#!" class="modal-action modal-close waves-effect waves-green btn-flat">Accept</a>
-                    <a href="#!" class="modal-action modal-close waves-effect waves-red btn-flat">Decline</a>
+                    <a href="#!" id="acceptChallenge" class="btn-challenge modal-action modal-close waves-effect waves-green btn-flat">Accept</a>
+                    <a href="#!" id="declineChallenge" class="btn-challenge modal-action modal-close waves-effect waves-red btn-flat">Decline</a>
                 </div>
             </div>
         </div>
@@ -94,10 +94,16 @@
             $(".modal").modal();
             databaseHandler = new DatabaseHandler(UpdateOtherPlayersOutlet, NewRequestCallback);
 
-            $("#welcomeHeader").text("Welcome " + ParsePlayerName(databaseHandler.playerName) + "!").addClass(databaseHandler.playerName.split(".")[0] + "-text");
+            var welcomeText = "Welcome " + ParsePlayerName(databaseHandler.playerName) + "!";
+            var textColor = databaseHandler.playerName.split(".")[0] + "-text";
+            $("#welcomeHeader").text(welcomeText).addClass(textColor);
 
             $(document).on("click", ".challengePlayer", function(e) {
                 databaseHandler.challengePlayer($(this).data("uid"));
+            });
+
+            $(".btn-challenge").click(function() {
+                console.log($(this).data("uid"), $(this).attr("id"));
             });
         };
 
@@ -141,6 +147,7 @@
         };
 
         function NewRequestCallback() {
+            if (requestPending) { return; }
             var requests = JSON.parse(JSON.stringify(databaseHandler.requests)); // Copy by value in case it changes while rendering
             var numRequests = Object.keys(requests).length;
             if (numRequests < 1) { return; }
@@ -149,11 +156,16 @@
             for (var key in requests) { R.push([key, requests[key]]); }
             R.sort(function(a, b) { return a[1] - b[1]; });
             var otherPlayers = JSON.parse(JSON.stringify(databaseHandler.otherPlayers));
+            // Look through requests until active request is found
             for (var i = 0; i < R.length; i++) {
                 var challengerID = R[i][0];
                 var challenger = otherPlayers[challengerID];
                 if (challenger !== undefined) {
-                    console.log(ParsePlayerName(challenger));
+                    requestPending = true;
+                    var modal = $("#challenge");
+                    $("#challenge > .modal-content > h4").text(ParsePlayerName(challenger) + " has challenged you to a match!");
+                    $(".btn-challenge").data("uid", challengerID);
+                    modal.modal("open");
                     break;
                 }
             }
