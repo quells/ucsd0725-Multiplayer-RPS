@@ -85,19 +85,19 @@
     <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
     <script src="assets/js/moment.min.js" charset="utf-8"></script>
     <script src="assets/js/random-names.js" charset="utf-8"></script>
-    <script src="assets/js/app.js" charset="utf-8"></script>
+    <script src="assets/js/database-handler.js" charset="utf-8"></script>
     <script type="text/javascript">
-        var app;
+        var databaseHandler;
         var requestPending = false; var requestPendingFrom;
 
         function Main() {
             $(".modal").modal();
-            app = new App(UpdateOtherPlayersOutlet, NewRequestCallback);
+            databaseHandler = new DatabaseHandler(UpdateOtherPlayersOutlet, NewRequestCallback);
 
-            $("#welcomeHeader").text("Welcome " + ParsePlayerName(app.playerName) + "!").addClass(app.playerName.split(".")[0] + "-text");
+            $("#welcomeHeader").text("Welcome " + ParsePlayerName(databaseHandler.playerName) + "!").addClass(databaseHandler.playerName.split(".")[0] + "-text");
 
             $(document).on("click", ".challengePlayer", function(e) {
-                app.challengePlayer($(this).data("uid"));
+                databaseHandler.challengePlayer($(this).data("uid"));
             });
         };
 
@@ -120,7 +120,7 @@
         function UpdateOtherPlayersOutlet() {
             var otherPlayersOutlet = $("#otherPlayers");
             otherPlayersOutlet.empty();
-            var otherPlayers = JSON.parse(JSON.stringify(app.otherPlayers)); // Copy by value in case it changes while rendering
+            var otherPlayers = JSON.parse(JSON.stringify(databaseHandler.otherPlayers)); // Copy by value in case it changes while rendering
             var numOtherPlayers = Object.keys(otherPlayers).length;
             if (numOtherPlayers < 1) {
                 var noOtherPlayers = $("<p class='caption'>").html("It looks like no one else is online.<br>Share this page with a friend to play with them!");
@@ -141,11 +141,22 @@
         };
 
         function NewRequestCallback() {
-            var requests = JSON.parse(JSON.stringify(app.requests)); // Copy by value in case it changes while rendering
-            console.log(app.requests)
+            var requests = JSON.parse(JSON.stringify(databaseHandler.requests)); // Copy by value in case it changes while rendering
             var numRequests = Object.keys(requests).length;
             if (numRequests < 1) { return; }
-
+            // Sort requests in order of when they were made
+            var R = [];
+            for (var key in requests) { R.push([key, requests[key]]); }
+            R.sort(function(a, b) { return a[1] - b[1]; });
+            var otherPlayers = JSON.parse(JSON.stringify(databaseHandler.otherPlayers));
+            for (var i = 0; i < R.length; i++) {
+                var challengerID = R[i][0];
+                var challenger = otherPlayers[challengerID];
+                if (challenger !== undefined) {
+                    console.log(ParsePlayerName(challenger));
+                    break;
+                }
+            }
         }
 
         $(document).ready(Main);

@@ -1,4 +1,4 @@
-var App = function(otherPlayersCallback, newRequestCallback) {
+var DatabaseHandler = function(otherPlayersCallback, newRequestCallback) {
     // Initialize Firebase
     var firebaseConfig = {
       apiKey: "AIzaSyDche8iZhBNbdpWq8bpLi9YKyjwuCh1M9w",
