@@ -117,8 +117,8 @@
                 var challengerID = $(this).data("uid");
                 var challenger = databaseHandler.otherPlayers[challengerID];
                 requestPending = true;
-                $("#challenge > .modal-content > h4").text("You have challenged " + ParsePlayerName(challenger) + " to a match!");
-                $(".btn-challenge").addClass("hide");
+                $("#challenge > .modal-content > h4").html("You have challenged <span>" + ParsePlayerName(challenger) + "</span> to a match!");
+                $(".btn-challenge").addClass("hide").data("uid", challengerID);
                 $("#cancelChallenge").removeClass("hide");
                 $("#challenge").modal("open");
 
@@ -127,7 +127,14 @@
 
             $(".btn-challenge").click(function() {
                 requestPending = false;
-                console.log($(this).data("uid"), $(this).attr("id"));
+                var otherID = $(this).data("uid");
+                switch ($(this).attr("id")) {
+                    case "acceptChallenge": break;
+                    case "declineChallenge": break;
+                    case "cancelChallenge":
+                        databaseHandler.cancelChallenge(otherID);
+                        break;
+                }
             });
         };
 
@@ -170,7 +177,16 @@
             }
         };
 
-        function NewRequestCallback() {
+        function NewRequestCallback(data) {
+            if (Object.keys(data.cancelled).length > 0) {
+                var challengerID = $(".btn-challenge").data("uid");
+                if (data.cancelled[challengerID] !== undefined) {
+                    var challengerName = $("#challenge > .modal-content > h4 > span").text();
+                    $("#challenge > .modal-content > h4").html("<span>" + challengerName + "</span> has cancelled their challenge.");
+                    $(".btn-challenge").removeClass("hide").addClass("hide");
+                    setTimeout(function() { $("#challenge").modal("close"); requestPending = false; }, 1000);
+                }
+            }
             if (requestPending) { return; }
             var requests = JSON.parse(JSON.stringify(databaseHandler.requests)); // Copy by value in case it changes while rendering
             var numRequests = Object.keys(requests).length;
@@ -186,7 +202,7 @@
                 var challenger = otherPlayers[challengerID];
                 if (challenger !== undefined) {
                     requestPending = true;
-                    $("#challenge > .modal-content > h4").text(ParsePlayerName(challenger) + " has challenged you to a match!");
+                    $("#challenge > .modal-content > h4").html("<span>" + ParsePlayerName(challenger) + "</span> has challenged you to a match!");
                     $(".btn-challenge").data("uid", challengerID).removeClass("hide");
                     $("#cancelChallenge").addClass("hide");
                     $("#challenge").modal("open");
