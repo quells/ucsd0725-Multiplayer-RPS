@@ -90,6 +90,7 @@
                 <div class="modal-footer">
                     <a href="#!" id="acceptChallenge" class="btn-challenge modal-action modal-close waves-effect waves-green btn-flat">Accept</a>
                     <a href="#!" id="declineChallenge" class="btn-challenge modal-action modal-close waves-effect waves-red btn-flat">Decline</a>
+                    <a href="#!" id="cancelChallenge" class="btn-challenge modal-action modal-close waves-effect btn-flat">Cancel</a>
                 </div>
             </div>
         </div>
@@ -112,8 +113,16 @@
             var textColor = databaseHandler.playerName.split(".")[0] + "-text";
             $("#welcomeHeader").text(welcomeText).addClass(textColor);
 
-            $(document).on("click", ".challengePlayer", function(e) {
-                databaseHandler.challengePlayer($(this).data("uid"));
+            $(document).on("click", ".challengePlayer", function() {
+                var challengerID = $(this).data("uid");
+                var challenger = databaseHandler.otherPlayers[challengerID];
+                requestPending = true;
+                $("#challenge > .modal-content > h4").text("You have challenged " + ParsePlayerName(challenger) + " to a match!");
+                $(".btn-challenge").addClass("hide");
+                $("#cancelChallenge").removeClass("hide");
+                $("#challenge").modal("open");
+
+                databaseHandler.challengePlayer(challengerID);
             });
 
             $(".btn-challenge").click(function() {
@@ -178,7 +187,8 @@
                 if (challenger !== undefined) {
                     requestPending = true;
                     $("#challenge > .modal-content > h4").text(ParsePlayerName(challenger) + " has challenged you to a match!");
-                    $(".btn-challenge").data("uid", challengerID);
+                    $(".btn-challenge").data("uid", challengerID).removeClass("hide");
+                    $("#cancelChallenge").addClass("hide");
                     $("#challenge").modal("open");
                     break;
                 }
