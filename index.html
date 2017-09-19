@@ -15,7 +15,7 @@
             </div>
         </header>
 
-        <div class="container">
+        <div id="lobby" class="container">
             <div class="row">
                 <div class="col s12 l6">
                     <h3 id="welcomeHeader" class="center-on-small-only"></h3>
@@ -103,21 +103,24 @@
     <script src="assets/js/database-handler.js" charset="utf-8"></script>
     <script type="text/javascript">
         var databaseHandler;
-        var requestPending = false; var requestPendingFrom;
+        var requestPending = false;
 
         function Main() {
             $(".modal").modal({ dismissible: false });
-            databaseHandler = new DatabaseHandler(UpdateOtherPlayersOutlet, NewRequestCallback);
+            databaseHandler = new DatabaseHandler(UpdateOtherPlayersOutlet, NewRequestCallback, GoToGameCallback);
 
             var welcomeText = "Welcome " + ParsePlayerName(databaseHandler.playerName) + "!";
             var textColor = databaseHandler.playerName.split(".")[0] + "-text";
             $("#welcomeHeader").text(welcomeText).addClass(textColor);
 
             $(document).on("click", ".challengePlayer", function() {
+                if ($(this).hasClass("tooltipped")) {
+                    return;
+                }
                 var challengerID = $(this).data("uid");
                 var challenger = databaseHandler.otherPlayers[challengerID];
                 requestPending = true;
-                $("#challenge > .modal-content > h4").html("You have challenged <span>" + ParsePlayerName(challenger) + "</span> to a match!");
+                $("#challenge > .modal-content > h4").html("You have challenged <span>" + ParsePlayerName(challenger.name) + "</span> to a match!");
                 $(".btn-challenge").addClass("hide").data("uid", challengerID);
                 $("#cancelChallenge").removeClass("hide");
                 $("#challenge").modal("open");
@@ -128,13 +131,8 @@
             $(".btn-challenge").click(function() {
                 requestPending = false;
                 var otherID = $(this).data("uid");
-                switch ($(this).attr("id")) {
-                    case "acceptChallenge": break;
-                    case "declineChallenge": break;
-                    case "cancelChallenge":
-                        databaseHandler.cancelChallenge(otherID);
-                        break;
-                }
+                var action = $(this).attr("id");
+                databaseHandler[action](otherID);
             });
         };
 
@@ -167,8 +165,20 @@
                 var otherPlayersList = $("<ul class='collection'>");
                 for (var key in otherPlayers) {
                     var otherPlayer = $("<a href='#' class='challengePlayer'>");
-                    otherPlayer.html(ParsePlayerName(otherPlayers[key]));
-                    otherPlayer.append($("<span class='secondary-content blue-text'><i class='material-icons'>play_circle_filled</i></span>"));
+                    otherPlayer.html(ParsePlayerName(otherPlayers[key].name));
+                    var color = "blue-text";
+                    var shape = "play_circle_filled";
+                    if (otherPlayers[key]["in-game-against"] !== undefined) {
+                        color = "orange-text";
+                        shape = "do_not_disturb_on";
+                        otherPlayer.addClass(color + " tooltipped");
+                        otherPlayer.tooltip({
+                            "position": "right",
+                            "delay": "50",
+                            "tooltip": "Currently in Match"
+                        });
+                    }
+                    otherPlayer.append($("<span class='secondary-content " + color + "'><i class='material-icons'>" + shape + "</i></span>"));
                     otherPlayer.data("uid", key);
                     $("<li class='collection-item'>").append(otherPlayer).appendTo(otherPlayersList);
                 }
@@ -178,13 +188,19 @@
         };
 
         function NewRequestCallback(data) {
-            if (Object.keys(data.cancelled).length > 0) {
-                var challengerID = $(".btn-challenge").data("uid");
-                if (data.cancelled[challengerID] !== undefined) {
-                    var challengerName = $("#challenge > .modal-content > h4 > span").text();
-                    $("#challenge > .modal-content > h4").html("<span>" + challengerName + "</span> has cancelled their challenge.");
-                    $(".btn-challenge").removeClass("hide").addClass("hide");
-                    setTimeout(function() { $("#challenge").modal("close"); requestPending = false; }, 1000);
+            if (data !== undefined) {
+                if (Object.keys(data.cancelled).length > 0) {
+                    var challengerID = $(".btn-challenge").data("uid");
+                    if (data.cancelled[challengerID] !== undefined) {
+                        var challengerName = $("#challenge > .modal-content > h4 > span").text();
+                        $("#challenge > .modal-content > h4").html("<span>" + challengerName + "</span> has cancelled their challenge.");
+                        $(".btn-challenge").removeClass("hide").addClass("hide");
+                        setTimeout(function() {
+                            $("#challenge").modal("close");
+                            requestPending = false;
+                            NewRequestCallback();
+                        }, 1000);
+                    }
                 }
             }
             if (requestPending) { return; }
@@ -202,14 +218,22 @@
                 var challenger = otherPlayers[challengerID];
                 if (challenger !== undefined) {
                     requestPending = true;
-                    $("#challenge > .modal-content > h4").html("<span>" + ParsePlayerName(challenger) + "</span> has challenged you to a match!");
+                    $("#challenge > .modal-content > h4").html("<span>" + ParsePlayerName(challenger.name) + "</span> has challenged you to a match!");
                     $(".btn-challenge").data("uid", challengerID).removeClass("hide");
                     $("#cancelChallenge").addClass("hide");
                     $("#challenge").modal("open");
                     break;
                 }
             }
-        }
+        };
+
+        function GoToGameCallback(data) {
+            console.log(data);
+            if (data.hasOpponent) {
+                $("#challenge").modal("close");
+                $("#lobby").addClass("hide");
+            }
+        };
 
         $(document).ready(Main);
     </script>

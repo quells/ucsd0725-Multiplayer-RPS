@@ -1,4 +1,4 @@
-var DatabaseHandler = function(otherPlayersCallback, newRequestCallback) {
+var DatabaseHandler = function(otherPlayersCallback, newRequestCallback, goToGameCallback) {
     // Initialize Firebase
     var firebaseConfig = {
       apiKey: "AIzaSyDche8iZhBNbdpWq8bpLi9YKyjwuCh1M9w",
@@ -15,10 +15,12 @@ var DatabaseHandler = function(otherPlayersCallback, newRequestCallback) {
     this.playerName = RandomName();
     this.otherPlayers = {};
     this.requests = {};
+    this.gameKey = undefined;
 
     var self = this;
     this.otherPlayersCallback = otherPlayersCallback;
     this.newRequestCallback = newRequestCallback;
+    this.goToGameCallback = goToGameCallback;
 
     this.connections = this.database.ref("/connections");
     this.database.ref(".info/connected").on("value", function(connected) {
@@ -47,6 +49,19 @@ var DatabaseHandler = function(otherPlayersCallback, newRequestCallback) {
                     "new": newRequests
                 });
             });
+            con.child("in-game-against").on("value", function(snapshot) {
+                snapshot = snapshot.val();
+                self.opponent = snapshot;
+                var data = { "hasOpponent": false }
+                if (self.opponent !== null) {
+                    data.hasOpponent = true;
+                    console.log(self.opponent);
+                }
+                self.goToGameCallback(data);
+            });
+            con.child("declines").on("value", function(snapshot) {
+                
+            });
         }
     });
     this.connections.on("value", function(snapshot) {
@@ -55,7 +70,7 @@ var DatabaseHandler = function(otherPlayersCallback, newRequestCallback) {
         // Filter out user's id
         for (var key in snapshot) {
             if (key !== self.uid) {
-                self.otherPlayers[key] = snapshot[key].name;
+                self.otherPlayers[key] = snapshot[key];
             }
         }
         // Remove requests from disconnected players
@@ -72,6 +87,17 @@ var DatabaseHandler = function(otherPlayersCallback, newRequestCallback) {
 
     this.challengePlayer = function(uid) {
         self.connections.child(uid).child("requests").child(self.uid).set(firebase.database.ServerValue.TIMESTAMP);
+    }
+
+    this.acceptChallenge = function(uid) {
+        self.connections.child(uid).child("in-game-against").set(self.uid);
+        self.connections.child(self.uid).child("in-game-against").set(uid);
+        self.connections.child(self.uid).child("requests").remove();
+    }
+
+    this.declineChallenge = function(uid) {
+        self.connections.child(self.uid).child("requests").child(uid).remove();
+        self.connections.child(uid).child("declines").child(self.uid).set(true);
     }
 
     this.cancelChallenge = function(uid) {
