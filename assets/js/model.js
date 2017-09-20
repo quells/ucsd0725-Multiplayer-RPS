@@ -105,7 +105,6 @@ var Model = function() {
 
                 con.child("status").on("value", function(snapshot) {
                     snapshot = snapshot.val();
-                    console.log("status", snapshot)
                     self.fireCallbacks("requests", snapshot);
                     self.PlayerStatus = snapshot;
                 });
