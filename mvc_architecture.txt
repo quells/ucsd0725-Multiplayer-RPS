@@ -7,12 +7,12 @@
     ie View will register callback for newly connected players
     maybe only for diffs: `added`, `removed`, `changed`
 
-= View =
+= View Controller =
 - Handles updating UI (imperative interface)
 - Other actors can register callbacks to run when user interacts with UI (reactive)
     ie click events, mainly
 
-= Controller =
+= App Controller =
 - Keeps track of app state
     Lobby, Challenge Received / Challenge Pending, Battle In Progress
 - Request Queue? Cleared on entering battle
