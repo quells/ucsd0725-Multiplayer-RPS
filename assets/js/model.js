@@ -65,6 +65,7 @@ var Model = function() {
         if (self.isLit) { return; }
         self.isLit = true;
         self.RegisterCallback("connections", function(diffs) {
+            var snapshot_old = JSON.parse(JSON.stringify(self.OtherPlayers));
             for (var p in diffs.added) {
                 if (p === self.UID) { continue; }
                 self.OtherPlayers[p] = diffs.added[p];
@@ -85,6 +86,7 @@ var Model = function() {
                     delete self.OtherPlayers[p];
                 }
             }
+            diffs = DiffObjects(snapshot_old, self.OtherPlayers);
             self.fireCallbacks("otherPlayers", diffs);
         })
         // Firebase
