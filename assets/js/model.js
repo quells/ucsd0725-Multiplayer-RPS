@@ -84,6 +84,7 @@ var Model = function() {
             diffs = DiffObjects(snapshot_old, self.OtherPlayers);
             self.fireCallbacks("otherPlayers", diffs);
         })
+
         // Firebase
         self.database.ref("/connections").on("value", function(snapshot) {
             snapshot = snapshot.val();
@@ -99,6 +100,29 @@ var Model = function() {
                 });
                 con.onDisconnect().remove();
                 self.UID = con.key;
+
+                var user = con.child(self.UID);
+
+                user.child("requests").on("value", function(snapshot) {
+                    snapshot = snapshot.val();
+                    var diffs = DiffObjects(self.requests, snapshot);
+                    self.fireCallbacks("requests", diffs);
+                    self.requests = snapshot;
+                });
+
+                user.child("responses").on("value", function(snapshot) {
+                    snapshot = snapshot.val();
+                    var diffs = DiffObjects(self.responses, snapshot);
+                    self.fireCallbacks("responses", diffs);
+                    self.responses = snapshot;
+                });
+
+                user.child("game").on("value", function(snapshot) {
+                    snapshot = snapshot.val();
+                    var diffs = DiffObjects(self.game, snapshot);
+                    self.fireCallbacks("game", diffs);
+                    self.game = snapshot;
+                });
             }
         });
     }
