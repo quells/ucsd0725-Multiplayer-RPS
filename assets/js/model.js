@@ -87,6 +87,7 @@ var Model = function() {
 
         // Firebase
         self.database.ref("/connections").on("value", function(snapshot) {
+            // Update local cache of users
             snapshot = snapshot.val();
             var diffs = DiffObjects(self.connections, snapshot);
             self.fireCallbacks("connections", diffs);
@@ -94,30 +95,36 @@ var Model = function() {
         });
         self.database.ref(".info/connected").on("value", function(connected) {
             if (connected.val()) {
+                // New user
                 var con = self.database.ref("/connections").push({
                     "name": self.PlayerName,
-                    "status": self.PlayerStatus
+                    "status": "lobby"
                 });
                 con.onDisconnect().remove();
                 self.UID = con.key;
 
-                var user = con.child(self.UID);
+                con.child("status").on("value", function(snapshot) {
+                    snapshot = snapshot.val();
+                    console.log("status", snapshot)
+                    self.fireCallbacks("requests", snapshot);
+                    self.PlayerStatus = snapshot;
+                });
 
-                user.child("requests").on("value", function(snapshot) {
+                con.child("requests").on("value", function(snapshot) {
                     snapshot = snapshot.val();
                     var diffs = DiffObjects(self.requests, snapshot);
                     self.fireCallbacks("requests", diffs);
                     self.requests = snapshot;
                 });
 
-                user.child("responses").on("value", function(snapshot) {
+                con.child("responses").on("value", function(snapshot) {
                     snapshot = snapshot.val();
                     var diffs = DiffObjects(self.responses, snapshot);
                     self.fireCallbacks("responses", diffs);
                     self.responses = snapshot;
                 });
 
-                user.child("game").on("value", function(snapshot) {
+                con.child("game").on("value", function(snapshot) {
                     snapshot = snapshot.val();
                     var diffs = DiffObjects(self.game, snapshot);
                     self.fireCallbacks("game", diffs);
