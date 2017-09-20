@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+    </head>
+    <body>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
+    <script src="assets/js/random-names.js" charset="utf-8"></script>
+    <script type="text/javascript">
+
+/*
+== Architecture Overview ==
+
+= Model =
+- Gets updates from Firebase (reactive/automatic)
+- Pushes updates to Firebase (reactive/automatic)
+- Other actors can register callbacks to run when specified updates happen (reactive)
+    ie View will register callback for newly connected players
+    maybe only for diffs: `added`, `removed`, `changed`
+
+= View =
+- Handles updating UI (imperative interface)
+- Other actors can register callbacks to run when user interacts with UI (reactive)
+    ie click events, mainly
+
+= Controller =
+- Keeps track of app state
+    Lobby, Challenge Received / Challenge Pending, Battle In Progress
+- Request Queue? Cleared on entering battle
+- Registers callbacks with Model for updates
+    Filter through state machine
+    Pass on to View or discard
+
+*/
+
+var Model = function() {
+    // Initialize Firebase
+    var firebaseConfig = {
+      apiKey: "AIzaSyDche8iZhBNbdpWq8bpLi9YKyjwuCh1M9w",
+      authDomain: "ungnawed-leech.firebaseapp.com",
+      databaseURL: "https://ungnawed-leech.firebaseio.com",
+      projectId: "ungnawed-leech",
+      storageBucket: "",
+      messagingSenderId: "798037079320"
+    };
+    firebase.initializeApp(firebaseConfig);
+    this.database = firebase.database();
+}
+
+    </script>
+    </body>
+</html>
