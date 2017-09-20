@@ -20,10 +20,13 @@ var Model = function() {
     // Local Data
     this.UID = "";
     this.PlayerName = RandomName();
+    this.PlayerStatus = "lobby";
+    this.OtherPlayers = {};
     var self = this;
 
     // Callbacks
     this.connectionsCallbacks = {index: 0};
+    this.otherPlayersCallbacks = {index: 0};
     this.requestsCallbacks = {index: 0};
     this.responsesCallbacks = {index: 0};
     this.gameCallbacks = {index: 0};
@@ -61,6 +64,29 @@ var Model = function() {
         // Allows callbacks to be registered before all the Firebase stuff starts
         if (self.isLit) { return; }
         self.isLit = true;
+        self.RegisterCallback("connections", function(diffs) {
+            for (var p in diffs.added) {
+                if (p === self.UID) { continue; }
+                self.OtherPlayers[p] = diffs.added[p];
+            }
+            for (var p in diffs.updated) {
+                if (p === self.UID) {
+                    if (JSON.Stringify(diffs.updated[p]) !== JSON.Stringify({"name": self.PlayerName, "status": self.PlayerStatus})) {
+                        console.log("Model.connectionsCallback warning: discrepancy between server and client");
+                    }
+                } else {
+                    self.OtherPlayers[p] = diffs.updated[p];
+                }
+            }
+            for (var p in diffs.removed) {
+                if (p === self.UID) {
+                    console.log("Model.connectionsCallback warning: I no longer exist on the server");
+                } else {
+                    delete self.OtherPlayers[p];
+                }
+            }
+            self.fireCallbacks("otherPlayers", diffs);
+        })
         // Firebase
         self.database.ref("/connections").on("value", function(snapshot) {
             snapshot = snapshot.val();
@@ -70,7 +96,10 @@ var Model = function() {
         });
         self.database.ref(".info/connected").on("value", function(connected) {
             if (connected.val()) {
-                var con = self.database.ref("/connections").push({"name": self.PlayerName});
+                var con = self.database.ref("/connections").push({
+                    "name": self.PlayerName,
+                    "status": self.PlayerStatus
+                });
                 con.onDisconnect().remove();
                 self.UID = con.key;
             }
