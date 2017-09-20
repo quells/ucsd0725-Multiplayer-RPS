@@ -23,3 +23,19 @@ function DiffObjects(obj_old, obj_new) {
         "updated": updated
     }
 };
+
+function Capitalize(s) {
+    s = s || "";
+    if (s.length === 0) { return ""; }
+    var c = s.split(" ");
+    c.forEach(function(s, i) { c[i] = s[0].toUpperCase() + s.slice(1); });
+    return c.join(" ");
+};
+
+function ParsePlayerName(name) {
+    name = name || "";
+    name = name.split(".");
+    var color = Capitalize(name[0].split("-").join(" "));
+    var noun = Capitalize(name[1]);
+    return color + " " + noun;
+};

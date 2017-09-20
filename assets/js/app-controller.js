@@ -1,8 +1,11 @@
 var AppController = function(model) {
-    this.model = model;
     var self = this;
+    this.model = model;
+    this.viewController = new ViewController(this.model.PlayerName);
 
-    this.status = function() {
-        return self.model.PlayerStatus;
-    }
+    this.model.RegisterCallback("otherPlayers", function(diffs) {
+        self.viewController.RemovePlayers(diffs.removed);
+        self.viewController.UpdatePlayers(diffs.updated);
+        self.viewController.AddPlayers(diffs.added);
+    });
 }

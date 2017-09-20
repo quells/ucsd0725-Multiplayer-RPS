@@ -96,6 +96,7 @@
         </div>
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
     <script src="assets/js/random-names.js" charset="utf-8"></script>
     <script src="assets/js/utils.js" charset="utf-8"></script>
@@ -103,9 +104,9 @@
     <script src="assets/js/view-controller.js" charset="utf-8"></script>
     <script src="assets/js/app-controller.js" charset="utf-8"></script>
     <script type="text/javascript">
+        $(".modal").modal({ dismissible: false });
         var model = new Model();
-        var viewController = new ViewController();
-        var appController = new AppController(model, viewController);
+        var appController = new AppController(model);
         model.Ignite();
     </script>
     </body>
