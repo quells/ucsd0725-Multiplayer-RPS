@@ -13,30 +13,6 @@
     <script src="assets/js/model.js" charset="utf-8"></script>
     <script type="text/javascript">
 
-/*
-== Architecture Overview ==
-
-= Model =
-- Gets updates from Firebase (reactive/automatic)
-- Pushes updates to Firebase (reactive/automatic)
-- Other actors can register callbacks to run when specified updates happen (reactive)
-    ie View will register callback for newly connected players
-    maybe only for diffs: `added`, `removed`, `changed`
-
-= View =
-- Handles updating UI (imperative interface)
-- Other actors can register callbacks to run when user interacts with UI (reactive)
-    ie click events, mainly
-
-= Controller =
-- Keeps track of app state
-    Lobby, Challenge Received / Challenge Pending, Battle In Progress
-- Request Queue? Cleared on entering battle
-- Registers callbacks with Model for updates
-    Filter through state machine
-    Pass on to View or discard
-
-*/
 
 var model = new Model();
 model.RegisterCallback("otherPlayers", function(diffs) { console.log(diffs); });
