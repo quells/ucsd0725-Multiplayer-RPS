@@ -71,13 +71,8 @@ var Model = function() {
                 self.OtherPlayers[p] = diffs.added[p];
             }
             for (var p in diffs.updated) {
-                if (p === self.UID) {
-                    if (JSON.Stringify(diffs.updated[p]) !== JSON.Stringify({"name": self.PlayerName, "status": self.PlayerStatus})) {
-                        console.log("Model.connectionsCallback warning: discrepancy between server and client");
-                    }
-                } else {
-                    self.OtherPlayers[p] = diffs.updated[p];
-                }
+                if (p === self.UID) { continue; }
+                self.OtherPlayers[p] = diffs.updated[p];
             }
             for (var p in diffs.removed) {
                 if (p === self.UID) {
