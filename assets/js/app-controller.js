@@ -33,7 +33,7 @@ var AppController = function(model) {
             self.viewController.ModalForChallengeFromPlayer(otherPlayerName, self.consideringMatchWith);
         } else if (considerSnapshot.length > 0 && self.consideringMatchWith.length > 0) {
             if (considerSnapshot !== self.consideringMatchWith) {
-                // Different Challenge
+                // Different Challenge (not sure this will ever happen, but...)
                 var oldPlayerName = self.model.GetPlayerName(considerSnapshot);
                 var otherUID = self.consideringMatchWith;
                 var otherPlayerName = self.model.GetPlayerName(otherUID);
@@ -51,7 +51,23 @@ var AppController = function(model) {
     });
 
     this.model.RegisterCallback("responses", function(diffs) {
-        console.log(diffs);
+        var union = UnionObjects(diffs.added, diffs.updated);
+        console.log(union);
+        if (self.model.PlayerStatus !== "waiting") { return; }
+        var considerSnapshot = self.consideringMatchWith;
+        for (var uid in union) {
+            if (uid === considerSnapshot) {
+                var otherPlayerName = self.model.GetPlayerName(uid);
+                var response = union[uid];
+                self.viewController.DisplayResponseToChallenge(otherPlayerName, response);
+                self.model.RemoveResponseFrom(uid, response);
+                if (response) {
+                    // Start game
+                    console.log("start game, challeng-er")
+                }
+                return;
+            }
+        }
     });
 
     this.viewController.RegisterClickCallback(".challengePlayer", function(t, e) {
@@ -62,6 +78,7 @@ var AppController = function(model) {
         var otherUID = t.data("uid");
         var otherPlayerName = self.model.GetPlayerName(otherUID);
 
+        self.consideringMatchWith = otherUID;
         self.viewController.ModalForChallengingPlayer(otherPlayerName, otherUID);
         self.model.ChallengePlayer(otherUID);
     });
@@ -73,9 +90,10 @@ var AppController = function(model) {
         switch (action) {
             case "acceptChallenge":
                 self.model.RespondToChallenge(otherUID, true);
+                console.log("start game, challeng-ee")
                 break;
             case "declineChallenge":
-            self.model.RespondToChallenge(otherUID, false);
+                self.model.RespondToChallenge(otherUID, false);
                 break;
             case "cancelChallenge":
                 self.model.CancelChallenge(otherUID);

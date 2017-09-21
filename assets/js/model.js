@@ -82,7 +82,15 @@ var Model = function() {
         } else {
             self.database.ref("/connections").child(self.UID).child("status").set("lobby");
         }
-    }
+    };
+    this.RemoveResponseFrom = function(otherUID, response) {
+        self.database.ref("/connections").child(self.UID).child("responses").child(otherUID).remove();
+        if (response) {
+            self.database.ref("/connections").child(self.UID).child("status").set("in-game");
+        } else {
+            self.database.ref("/connections").child(self.UID).child("status").set("lobby");
+        }
+    };
 
     this.isLit = false;
     this.Ignite = function() {
@@ -90,6 +98,7 @@ var Model = function() {
         if (self.isLit) { return; }
         self.isLit = true;
         self.RegisterCallback("connections", function(diffs) {
+            // Populate OtherPlayers
             var snapshot_old = JSON.parse(JSON.stringify(self.OtherPlayers));
             for (var p in diffs.added) {
                 if (p === self.UID) { continue; }
@@ -104,6 +113,11 @@ var Model = function() {
                     console.log("Model.connectionsCallback warning: I no longer exist on the server");
                 } else {
                     delete self.OtherPlayers[p];
+                    // Filter out disconnected players from requests
+                    if (self.requests[p]) {
+                        self.database.ref("/connections").child(self.UID).child("requests").child(p).remove();
+                        self.database.ref("/connections").child(self.UID).child("status").set("lobby");
+                    }
                 }
             }
             diffs = DiffObjects(snapshot_old, self.OtherPlayers);

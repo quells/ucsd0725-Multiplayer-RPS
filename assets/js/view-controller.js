@@ -144,5 +144,14 @@ var ViewController = function(playerName) {
         setTimeout(function() {
             $("#challenge").modal("close");
         }, 1000);
-    }
+    };
+    this.DisplayResponseToChallenge = function(otherPlayerName, response) {
+        var responseText = response ? "accepted" : "declined";
+        var challengeText = "<span>" + otherPlayerName + "</span> has " + responseText + " your challenge.";
+        $("#challenge > .modal-content > h4").html(challengeText);
+        $(".btn-challenge").addClass("hide");
+        setTimeout(function() {
+            $("#challenge").modal("close");
+        }, 1000);
+    };
 }
