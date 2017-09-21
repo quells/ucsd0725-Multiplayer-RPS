@@ -1,0 +1,26 @@
+# Back-and-Forth Challenges Do Not Display
+
+Summary:
+Cannot send challenges back and forth if one is cancelled.
+
+Steps to Reproduce:
+1. Have two instances of the app open.
+2. In Window 1, challenge the player in Window 2.
+3. In Window 1, cancel the challenge.
+4. In Window 2, challenge the player in Window 1.
+5. See bug in Window 1.
+
+Expected Result:
+Player in Window 1 sees challenge from Window 2.
+
+Actual Result:
+Player in Window 1 never sees challenge, despite the request existing on the server.
+
+Reproducible:
+Always
+
+Notes:
+Related to `considerSnapshot` being equal to `self.consideringMatchWith`. Tried to use flag to fix, but was not successful. Perhaps `self.consideringMatchWith` is not being reset correctly.
+
+As of Commit:
+2f13274081d0f2d37d20b4f85a6d5ec3c3201738
