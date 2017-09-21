@@ -25,37 +25,41 @@ var Model = function() {
     var self = this;
 
     // Callbacks
-    this.connectionsCallbacks = {index: 0};
-    this.otherPlayersCallbacks = {index: 0};
-    this.requestsCallbacks = {index: 0};
-    this.responsesCallbacks = {index: 0};
-    this.gameCallbacks = {index: 0};
+    this.callbacks = {
+        "connections": {index: 0},
+        "otherPlayers": {index: 0},
+        "requests": {index: 0},
+        "responses": {index: 0},
+        "game": {index: 0}
+    };
     // Dynamic self-modification! WooooOOOOoooo
     this.RegisterCallback = function(target, callback) {
         if (target === undefined) { return; }
         if (callback === undefined) { return; }
-
-        target = target + "Callbacks";
-        if (self[target] === undefined) {
-            throw new Error("Model.RegisterCallback error: unknown target " + target);
+        var callbacks = self.callbacks[target];
+        if (callbacks === undefined) {
+            callbacks = {index: 0};
+            console.log("Model.RegisterCallback log: new target " + target);
         }
 
-        var i = self[target].index;
-        self[target][i] = callback;
-        self[target].index = i + 1;
+        var i = callbacks.index;
+        callbacks[i] = callback;
+        callbacks.index = i + 1;
+        self.callbacks[target] = callbacks;
     };
     this.fireCallbacks = function(target, diffs) {
         if (target === undefined) { return; }
         if (diffs === undefined) { return; }
 
-        target = target + "Callbacks";
-        if (self[target] === undefined) {
+        // target = target + "Callbacks";
+        if (self.callbacks[target] === undefined) {
             throw new Error("Model.fireCallback error: unknown target " + target);
         }
+        var callbacks = self.callbacks[target];
 
-        for (var p in self[target]) {
+        for (var p in callbacks) {
             if (p === "index") { continue; }
-            self[target][p](diffs);
+            callbacks[p](diffs);
         }
     };
 
