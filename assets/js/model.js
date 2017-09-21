@@ -110,21 +110,21 @@ var Model = function() {
                 });
 
                 con.child("requests").on("value", function(snapshot) {
-                    snapshot = snapshot.val();
+                    snapshot = snapshot.val() || {};
                     var diffs = DiffObjects(self.requests, snapshot);
                     self.fireCallbacks("requests", diffs);
                     self.requests = snapshot;
                 });
 
                 con.child("responses").on("value", function(snapshot) {
-                    snapshot = snapshot.val();
+                    snapshot = snapshot.val() || {};
                     var diffs = DiffObjects(self.responses, snapshot);
                     self.fireCallbacks("responses", diffs);
                     self.responses = snapshot;
                 });
 
                 con.child("game").on("value", function(snapshot) {
-                    snapshot = snapshot.val();
+                    snapshot = snapshot.val() || {};
                     var diffs = DiffObjects(self.game, snapshot);
                     self.fireCallbacks("game", diffs);
                     self.game = snapshot;
