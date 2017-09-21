@@ -70,34 +70,38 @@ var Model = function() {
         return ParsePlayerName(this.connections[uid].name);
     };
 
+    this.SetOwnStatus = function(status) {
+        self.PlayerStatus = status;
+        self.database.ref("/connections").child(self.UID).child("status").set(status);
+    }
     this.ChallengePlayer = function(otherUID) {
-        self.database.ref("/connections").child(self.UID).child("status").set("waiting");
+        self.SetOwnStatus("waiting");
         self.database.ref("/connections").child(otherUID).child("requests").child(self.UID).set(firebase.database.ServerValue.TIMESTAMP);
     };
     this.CancelChallenge = function(otherUID) {
-        self.database.ref("/connections").child(self.UID).child("status").set("lobby");
+        self.SetOwnStatus("lobby");
         self.database.ref("/connections").child(otherUID).child("requests").child(self.UID).remove();
     };
     this.RespondToChallenge = function(otherUID, response) {
         self.database.ref("/connections").child(self.UID).child("requests").child(otherUID).remove();
         self.database.ref("/connections").child(otherUID).child("responses").child(self.UID).set(response);
         if (response) {
-            self.database.ref("/connections").child(self.UID).child("status").set("in-game");
+            self.SetOwnStatus("in-game");
             self.database.ref("/connections").child(self.UID).child("game").set({
                 "wins": 0,
                 "losses": 0,
                 "ties": 0
             })
         } else {
-            self.database.ref("/connections").child(self.UID).child("status").set("lobby");
+            self.SetOwnStatus("lobby");
         }
     };
     this.RemoveResponses = function(response) {
         self.database.ref("/connections").child(self.UID).child("responses").remove();
         if (response) {
-            self.database.ref("/connections").child(self.UID).child("status").set("in-game");
+            self.SetOwnStatus("in-game");
         } else {
-            self.database.ref("/connections").child(self.UID).child("status").set("lobby");
+            self.SetOwnStatus("lobby");
         }
     };
 
