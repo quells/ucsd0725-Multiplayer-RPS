@@ -83,6 +83,11 @@ var Model = function() {
         self.database.ref("/connections").child(otherUID).child("responses").child(self.UID).set(response);
         if (response) {
             self.database.ref("/connections").child(self.UID).child("status").set("in-game");
+            self.database.ref("/connections").child(self.UID).child("game").set({
+                "wins": 0,
+                "losses": 0,
+                "ties": 0
+            })
         } else {
             self.database.ref("/connections").child(self.UID).child("status").set("lobby");
         }
