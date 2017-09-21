@@ -46,6 +46,8 @@ var AppController = function(model) {
                 setTimeout(function() {
                     self.viewController.ModalForChallengeFromPlayer(otherPlayerName, otherUID)
                 }, 1500);
+            } else {
+                // Bug here
             }
         } else if (considerSnapshot.length > 0 && self.consideringMatchWith.length === 0) {
             // Cancelled Challenge
