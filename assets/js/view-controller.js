@@ -113,9 +113,17 @@ var ViewController = function(playerName) {
 
     // ChallengeModal
     this.ModalForChallengingPlayer = function(otherPlayerName, otherUID) {
-        $("#challenge > .modal-content > h4").html("You have challenged <span>" + otherPlayerName + "</span> to a match!");
+        var challengeText = "You have challenged <span>" + otherPlayerName + "</span> to a match!";
+        $("#challenge > .modal-content > h4").html(challengeText);
         $(".btn-challenge").addClass("hide").data("uid", otherUID);
         $("#cancelChallenge").removeClass("hide");
+        $("#challenge").modal("open");
+    }
+    this.ModalForChallengeFromPlayer = function(otherPlayerName, otherUID) {
+        var challengeText = "<span>" + otherPlayerName + "</span> has challenged you to a match!";
+        $("#challenge > .modal-content > h4").html(challengeText);
+        $(".btn-challenge").removeClass("hide").data("uid", otherUID);
+        $("#cancelChallenge").addClass("hide");
         $("#challenge").modal("open");
     }
 }
