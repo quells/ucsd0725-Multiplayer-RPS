@@ -13,7 +13,7 @@ var AppController = function(model) {
     });
 
     this.model.RegisterCallback("requests", function(diffs) {
-        if (self.model.PlayerStatus !== "lobby") { return; }
+        if (self.model.PlayerStatus === "in-game") { return; }
         var considerSnapshot = self.consideringMatchWith;
         if (diffs instanceof Object) {
             for (var uid in diffs.removed) {
@@ -33,6 +33,7 @@ var AppController = function(model) {
             // New Challenge
             var otherPlayerName = self.model.GetPlayerName(self.consideringMatchWith);
             self.viewController.ModalForChallengeFromPlayer(otherPlayerName, self.consideringMatchWith);
+            self.model.SetOwnStatus("waiting");
         } else if (considerSnapshot.length > 0 && self.consideringMatchWith.length > 0) {
             if (considerSnapshot !== self.consideringMatchWith) {
                 // Different Challenge (not sure this will ever happen, but...)
@@ -41,14 +42,18 @@ var AppController = function(model) {
                 var otherUID = self.consideringMatchWith;
                 var otherPlayerName = self.model.GetPlayerName(otherUID);
                 self.viewController.CancelChallengeFromPlayer(oldPlayerName);
+                self.model.SetOwnStatus("waiting");
                 setTimeout(function() {
                     self.viewController.ModalForChallengeFromPlayer(otherPlayerName, otherUID)
-                }, 1100);
+                }, 1500);
             }
         } else if (considerSnapshot.length > 0 && self.consideringMatchWith.length === 0) {
             // Cancelled Challenge
             var otherPlayerName = self.model.GetPlayerName(considerSnapshot);
             self.viewController.CancelChallengeFromPlayer(otherPlayerName);
+            setTimeout(function() {
+                self.model.SetOwnStatus("lobby");
+            }, 1500);
             // Pull from queue
         }
     });
