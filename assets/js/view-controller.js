@@ -3,7 +3,9 @@ var ViewController = function(playerName) {
     var welcomeText = "Welcome " + ParsePlayerName(playerName) + "!";
     var textColor = playerName.split(".")[0] + "-text";
     $("#welcomeHeader").text(welcomeText).addClass(textColor);
+    // See firstRunFlag in this.RemovePlayers, which runs first on app launch
 
+    // Local Data
     this.otherPlayersCount = 0;
     this.colorCode = {
         "lobby": "green-text",
@@ -17,7 +19,7 @@ var ViewController = function(playerName) {
     }
     var self = this;
 
-    self.firstRunFlag = true;
+    // OtherPlayers List
     this.AddPlayers = function(players) {
         for (var uid in players) {
             self.otherPlayersCount++;
@@ -43,8 +45,7 @@ var ViewController = function(playerName) {
             listItem.attr("id", uid);
             $("#otherPlayers > ul").append(listItem);
         }
-    }
-
+    };
     this.UpdatePlayers = function(players) {
         var removeColorClasses = function (i, n) {
             var cs = [];
@@ -60,8 +61,8 @@ var ViewController = function(playerName) {
             icon.addClass(self.colorCode[players[uid].status]);
             icon.text(self.shapeCode[players[uid].status]);
         }
-    }
-
+    };
+    this.firstRunFlag = true;
     this.RemovePlayers = function(players) {
         if (self.firstRunFlag) {
             $("#otherPlayers > div").addClass("hide");
@@ -73,8 +74,7 @@ var ViewController = function(playerName) {
             self.otherPlayersCount--;
             $("#" + uid).remove();
         }
-    }
-
+    };
     this.UpdateOtherPlayersText = function() {
         if (self.otherPlayersCount < 1) {
             $("#otherPlayers > p.caption").html("It looks like no one else is online.<br>Share this page with a friend to play with them!");
