@@ -31,7 +31,7 @@ var Model = function() {
     this.responsesCallbacks = {index: 0};
     this.gameCallbacks = {index: 0};
     // Dynamic self-modification! WooooOOOOoooo
-    this.RegisterCallback = function (target, callback) {
+    this.RegisterCallback = function(target, callback) {
         if (target === undefined) { return; }
         if (callback === undefined) { return; }
 
@@ -57,6 +57,18 @@ var Model = function() {
             if (p === "index") { continue; }
             self[target][p](diffs);
         }
+    }
+
+    this.GetPlayerName = function(uid) {
+        if (this.connections[uid] === undefined) {
+            return "Unknown Player";
+        }
+        return ParsePlayerName(this.connections[uid].name);
+    }
+
+    this.ChallengePlayer = function(otherUID) {
+        self.database.ref("/connections").child(self.UID).child("status").set("waiting");
+        self.database.ref("/connections").child(otherUID).child("requests").child(self.UID).set(firebase.database.ServerValue.TIMESTAMP);
     }
 
     this.isLit = false;
