@@ -24,6 +24,16 @@ function DiffObjects(obj_old, obj_new) {
     }
 };
 
+function UnionObjects(primary, secondary) {
+    // If key exists on both primary and secondary,
+    // then the value in primary has precedence
+    var combined = JSON.parse(JSON.stringify(secondary));
+    for (var p in primary) {
+        combined[p] = primary[p];
+    }
+    return combined;
+};
+
 function Capitalize(s) {
     s = s || "";
     if (s.length === 0) { return ""; }
