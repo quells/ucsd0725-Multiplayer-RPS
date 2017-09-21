@@ -82,10 +82,21 @@ var ViewController = function(playerName) {
             var link = $("#" + uid + " > a");
             link.removeClass(removeColorClasses);
             link.addClass(self.colorCode[players[uid].status]);
+            link.removeClass("tooltipped");
+            link.tooltip("remove");
             var icon = $("#" + uid + " > a > span > i");
             icon.removeClass(removeColorClasses);
             icon.addClass(self.colorCode[players[uid].status]);
             icon.text(self.shapeCode[players[uid].status]);
+            if (players[uid].status !== "lobby") {
+                link.addClass("tooltipped");
+                var tooltipText = (players[uid].status === "waiting") ? "Waiting for Match" : "Currently in Match";
+                link.tooltip({
+                    "position": "right",
+                    "delay": "50",
+                    "tooltip": tooltipText
+                });
+            }
         }
     };
     this.firstRunFlag = true;
@@ -118,12 +129,20 @@ var ViewController = function(playerName) {
         $(".btn-challenge").addClass("hide").data("uid", otherUID);
         $("#cancelChallenge").removeClass("hide");
         $("#challenge").modal("open");
-    }
+    };
     this.ModalForChallengeFromPlayer = function(otherPlayerName, otherUID) {
         var challengeText = "<span>" + otherPlayerName + "</span> has challenged you to a match!";
         $("#challenge > .modal-content > h4").html(challengeText);
         $(".btn-challenge").removeClass("hide").data("uid", otherUID);
         $("#cancelChallenge").addClass("hide");
         $("#challenge").modal("open");
+    };
+    this.CancelChallengeFromPlayer = function(otherPlayerName) {
+        var challengeText = "<span>" + otherPlayerName + "</span> has cancelled their challenge.";
+        $("#challenge > .modal-content > h4").html(challengeText);
+        $(".btn-challenge").addClass("hide");
+        setTimeout(function() {
+            $("#challenge").modal("close");
+        }, 1000);
     }
 }

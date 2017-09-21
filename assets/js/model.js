@@ -57,18 +57,31 @@ var Model = function() {
             if (p === "index") { continue; }
             self[target][p](diffs);
         }
-    }
+    };
 
     this.GetPlayerName = function(uid) {
         if (this.connections[uid] === undefined) {
             return "Unknown Player";
         }
         return ParsePlayerName(this.connections[uid].name);
-    }
+    };
 
     this.ChallengePlayer = function(otherUID) {
         self.database.ref("/connections").child(self.UID).child("status").set("waiting");
         self.database.ref("/connections").child(otherUID).child("requests").child(self.UID).set(firebase.database.ServerValue.TIMESTAMP);
+    };
+    this.CancelChallenge = function(otherUID) {
+        self.database.ref("/connections").child(self.UID).child("status").set("lobby");
+        self.database.ref("/connections").child(otherUID).child("requests").child(self.UID).remove();
+    };
+    this.RespondToChallenge = function(otherUID, response) {
+        self.database.ref("/connections").child(self.UID).child("requests").child(otherUID).remove();
+        self.database.ref("/connections").child(otherUID).child("responses").child(self.UID).set(response);
+        if (response) {
+            self.database.ref("/connections").child(self.UID).child("status").set("in-game");
+        } else {
+            self.database.ref("/connections").child(self.UID).child("status").set("lobby");
+        }
     }
 
     this.isLit = false;
@@ -95,7 +108,7 @@ var Model = function() {
             }
             diffs = DiffObjects(snapshot_old, self.OtherPlayers);
             self.fireCallbacks("otherPlayers", diffs);
-        })
+        });
 
         // Firebase
         self.database.ref("/connections").on("value", function(snapshot) {
@@ -143,5 +156,5 @@ var Model = function() {
                 });
             }
         });
-    }
+    };
 };
