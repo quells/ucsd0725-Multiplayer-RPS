@@ -3,9 +3,6 @@ var ViewController = function(playerName) {
     var welcomeText = "Welcome " + ParsePlayerName(playerName) + "!";
     var textColor = playerName.split(".")[0] + "-text";
     $("#welcomeHeader").text(welcomeText).addClass(textColor);
-    $("#otherPlayers > div").remove();
-    $("#otherPlayers").append($("<p class='caption'>"));
-    $("#otherPlayers").append($("<ul class='collection'>"));
 
     this.otherPlayers = {};
     this.colorCode = {
@@ -20,6 +17,7 @@ var ViewController = function(playerName) {
     }
     var self = this;
 
+    self.firstRunFlag = true;
     this.AddPlayers = function(players) {
         for (var uid in players) {
             self.otherPlayers[uid] = players[uid];
@@ -66,6 +64,12 @@ var ViewController = function(playerName) {
     }
 
     this.RemovePlayers = function(players) {
+        if (self.firstRunFlag) {
+            $("#otherPlayers > div").addClass("hide");
+            $("#otherPlayers").append($("<p class='caption'>"));
+            $("#otherPlayers").append($("<ul class='collection'>"));
+            self.firstRunFlag = false;
+        }
         for (var uid in players) {
             $("#" + uid).remove();
             delete self.otherPlayers[uid];
