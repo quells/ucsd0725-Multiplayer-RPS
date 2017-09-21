@@ -15,16 +15,18 @@ var AppController = function(model) {
     this.model.RegisterCallback("requests", function(diffs) {
         if (self.model.PlayerStatus !== "lobby") { return; }
         var considerSnapshot = self.consideringMatchWith;
-        for (var uid in diffs.removed) {
-            if (uid === self.consideringMatchWith) {
-                self.consideringMatchWith = "";
+        if (diffs instanceof Object) {
+            for (var uid in diffs.removed) {
+                if (uid === self.consideringMatchWith) {
+                    self.consideringMatchWith = "";
+                }
             }
-        }
-        for (var uid in diffs.added) {
-            if (self.consideringMatchWith === "") {
-                self.consideringMatchWith = uid;
-            } else {
-                // Add to queue
+            for (var uid in UnionObjects(diffs.added, diffs.unchanged)) {
+                if (self.consideringMatchWith === "") {
+                    self.consideringMatchWith = uid;
+                } else {
+                    // Add to queue
+                }
             }
         }
         if (considerSnapshot.length === 0 && self.consideringMatchWith.length > 0) {
@@ -34,6 +36,7 @@ var AppController = function(model) {
         } else if (considerSnapshot.length > 0 && self.consideringMatchWith.length > 0) {
             if (considerSnapshot !== self.consideringMatchWith) {
                 // Different Challenge (not sure this will ever happen, but...)
+                console.log("one in a million?");
                 var oldPlayerName = self.model.GetPlayerName(considerSnapshot);
                 var otherUID = self.consideringMatchWith;
                 var otherPlayerName = self.model.GetPlayerName(otherUID);
@@ -52,6 +55,10 @@ var AppController = function(model) {
 
     this.model.RegisterCallback("responses", function(diffs) {
         var union = UnionObjects(diffs.added, diffs.updated);
+        union = UnionObjects(union, diffs.unchanged);
+        // ^ Fixes issue where repeatedly declining a request would not update the challenger,
+        //   though perhaps that would be a feature, not a bug, to prevent abuse.
+        //   For the purposes of a homework assignment, erring on the side of not-locking-up the UI.
         if (self.model.PlayerStatus !== "waiting") { return; }
         var considerSnapshot = self.consideringMatchWith;
         for (var uid in union) {

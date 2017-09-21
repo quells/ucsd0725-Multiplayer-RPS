@@ -2,6 +2,7 @@ function DiffObjects(obj_old, obj_new) {
     var added = {};
     var removed = {};
     var updated = {};
+    var unchanged = {};
     for (var p in obj_new) {
         if (obj_old[p] === undefined) {
             added[p] = obj_new[p]
@@ -9,6 +10,8 @@ function DiffObjects(obj_old, obj_new) {
             // Brittle, be on the lookout for bugs
             if (JSON.stringify(obj_old[p]) !== JSON.stringify(obj_new[p])) {
                 updated[p] = obj_new[p]
+            } else {
+                unchanged[p] = obj_old[p];
             }
         }
     }
@@ -20,7 +23,8 @@ function DiffObjects(obj_old, obj_new) {
     return {
         "added": added,
         "removed": removed,
-        "updated": updated
+        "updated": updated,
+        "unchanged": unchanged
     }
 };
 
