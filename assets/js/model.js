@@ -83,8 +83,8 @@ var Model = function() {
             self.database.ref("/connections").child(self.UID).child("status").set("lobby");
         }
     };
-    this.RemoveResponseFrom = function(otherUID, response) {
-        self.database.ref("/connections").child(self.UID).child("responses").child(otherUID).remove();
+    this.RemoveResponses = function(response) {
+        self.database.ref("/connections").child(self.UID).child("responses").remove();
         if (response) {
             self.database.ref("/connections").child(self.UID).child("status").set("in-game");
         } else {

@@ -52,7 +52,6 @@ var AppController = function(model) {
 
     this.model.RegisterCallback("responses", function(diffs) {
         var union = UnionObjects(diffs.added, diffs.updated);
-        console.log(union);
         if (self.model.PlayerStatus !== "waiting") { return; }
         var considerSnapshot = self.consideringMatchWith;
         for (var uid in union) {
@@ -60,7 +59,7 @@ var AppController = function(model) {
                 var otherPlayerName = self.model.GetPlayerName(uid);
                 var response = union[uid];
                 self.viewController.DisplayResponseToChallenge(otherPlayerName, response);
-                self.model.RemoveResponseFrom(uid, response);
+                self.model.RemoveResponses(response);
                 if (response) {
                     // Start game
                     console.log("start game, challeng-er")
