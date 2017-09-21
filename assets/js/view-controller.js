@@ -4,7 +4,7 @@ var ViewController = function(playerName) {
     var textColor = playerName.split(".")[0] + "-text";
     $("#welcomeHeader").text(welcomeText).addClass(textColor);
 
-    this.otherPlayers = {};
+    this.otherPlayersCount = 0;
     this.colorCode = {
         "lobby": "green-text",
         "waiting": "orange-text",
@@ -20,7 +20,7 @@ var ViewController = function(playerName) {
     self.firstRunFlag = true;
     this.AddPlayers = function(players) {
         for (var uid in players) {
-            self.otherPlayers[uid] = players[uid];
+            self.otherPlayersCount++;
             var color = self.colorCode[players[uid].status];
             var shape = self.shapeCode[players[uid].status];
             var otherPlayer = $("<a href='#' class='challengePlayer'>");
@@ -59,7 +59,6 @@ var ViewController = function(playerName) {
             icon.removeClass(removeColorClasses);
             icon.addClass(self.colorCode[players[uid].status]);
             icon.text(self.shapeCode[players[uid].status]);
-            self.otherPlayers[uid] = players[uid];
         }
     }
 
@@ -71,12 +70,18 @@ var ViewController = function(playerName) {
             self.firstRunFlag = false;
         }
         for (var uid in players) {
+            self.otherPlayersCount--;
             $("#" + uid).remove();
-            delete self.otherPlayers[uid];
         }
     }
 
     this.UpdateOtherPlayersText = function() {
-
+        if (self.otherPlayersCount < 1) {
+            $("#otherPlayers > p.caption").html("It looks like no one else is online.<br>Share this page with a friend to play with them!");
+            $("#otherPlayers > ul").addClass("hide");
+        } else {
+            $("#otherPlayers > p.caption").html("Choose another player to play against.");
+            $("#otherPlayers > ul").removeClass("hide");
+        }
     }
 }

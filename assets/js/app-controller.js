@@ -7,5 +7,6 @@ var AppController = function(model) {
         self.viewController.RemovePlayers(diffs.removed);
         self.viewController.UpdatePlayers(diffs.updated);
         self.viewController.AddPlayers(diffs.added);
+        self.viewController.UpdateOtherPlayersText();
     });
 }
