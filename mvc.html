@@ -15,7 +15,7 @@
             </div>
         </header>
 
-        <div id="lobby" class="container hide">
+        <div id="lobby" class="container">
             <div class="row">
                 <div class="col s12 l6">
                     <h3 id="welcomeHeader" class="center-on-small-only"></h3>
@@ -95,7 +95,7 @@
             </div>
         </div>
 
-        <div id="game" class="container">
+        <div id="game" class="container hide">
             <div class="row">
                 <div class="col s12 l6">
                     <h4 id="gamePrompt" class="center-on-small-only">Select a Symbol</h4>
@@ -187,9 +187,9 @@
     <script src="assets/js/app-controller.js" charset="utf-8"></script>
     <script type="text/javascript">
         $(".modal").modal({ dismissible: false });
-        // var model = new Model();
-        // var appController = new AppController(model);
-        // model.Ignite();
+        var model = new Model();
+        var appController = new AppController(model);
+        model.Ignite();
     </script>
     </body>
 </html>
