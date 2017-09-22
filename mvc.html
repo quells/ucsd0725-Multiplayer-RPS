@@ -15,7 +15,7 @@
             </div>
         </header>
 
-        <div id="lobby" class="container">
+        <div id="lobby" class="container hide">
             <div class="row">
                 <div class="col s12 l6">
                     <h3 id="welcomeHeader" class="center-on-small-only"></h3>
@@ -38,7 +38,7 @@
 
                     <div class="card horizontal">
                         <div class="card-image valign-wrapper">
-                            <svg width="100" height="96">
+                            <svg width="100" height="96" alt="Rock">
                                 <g stroke="#2d2d2d" stroke-width="4" fill="none">
                                     <circle cx="56" cy="48" r="32"/>
                                 </g>
@@ -52,7 +52,7 @@
 
                     <div class="card horizontal">
                         <div class="card-image valign-wrapper">
-                            <svg width="100" height="96">
+                            <svg width="100" height="96" alt="Paper">
                                 <g stroke="#2d2d2d" stroke-width="4" fill="none">
                                     <rect x="30" y="12" width="52" height="72"/>
                                 </g>
@@ -66,7 +66,7 @@
 
                     <div class="card horizontal">
                         <div class="card-image valign-wrapper">
-                            <svg width="100" height="96">
+                            <svg width="100" height="96" alt="Scissors">
                                 <g stroke="#2d2d2d" stroke-width="4" fill="none">
                                     <line x1="26" y1="18" x2="78" y2="70"/>
                                     <line x1="26" y1="78" x2="78" y2="26"/>
@@ -95,6 +95,88 @@
             </div>
         </div>
 
+        <div id="game" class="container">
+            <div class="row">
+                <div class="col s12 l6">
+                    <h4 id="gamePrompt" class="center-on-small-only">Select a Symbol</h4>
+                    <div class="row">
+                        <div class="col s4 center-on-small-only">
+                            <a href="#!" class="btn-floating btn-huge waves-effect waves-light blue">
+                                <svg width="96" height="96" alt="Rock">
+                                    <g stroke="#ffffff" stroke-width="4" fill="none">
+                                        <circle cx="48" cy="48" r="24"/>
+                                    </g>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="col s4 center-on-small-only">
+                            <a href="#!" class="btn-floating btn-huge waves-effect waves-light orange">
+                                <svg width="96" height="96" alt="Paper">
+                                    <g stroke="#ffffff" stroke-width="4" fill="none">
+                                        <rect x="29" y="21" width="38" height="54"/>
+                                    </g>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="col s4 center-on-small-only">
+                            <a href="#!" class="btn-floating btn-huge waves-effect waves-light blue">
+                                <svg width="96" height="96" alt="Scissors">
+                                    <g stroke="#ffffff" stroke-width="4" fill="none">
+                                        <line x1="26" y1="26" x2="64" y2="64"/>
+                                        <line x1="26" y1="70" x2="64" y2="32"/>
+                                        <circle cx="68" cy="68" r="6"/>
+                                        <circle cx="68" cy="28" r="6"/>
+                                    </g>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div id="gameCommentary">
+                        <p class="caption">
+                            You chose Paper. Blue Rhino chose Scissors.
+                            <br>
+                            Blue Rhino won!
+                        </p>
+                    </div>
+                </div>
+                <div class="col s12 l6">
+                    <h4 class="center-on-small-only">Statistics</h4>
+                    <table class="centered">
+                        <thead>
+                            <tr>
+                                <th>Wins</th>
+                                <th>Losses</th>
+                                <th>Ties</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr id="winsLosses">
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <h4 class="center-on-small-only">Chat</h4>
+                    <div id="chatWindow">
+                        <div class="chat-bubble bubble-left">
+                            <i class="material-icons">alarm</i>
+                        </div>
+                        <div class="chat-bubble bubble-right">
+                            <i class="material-icons">android</i>
+                        </div>
+                    </div>
+                    <br>
+                    <a href="#!" class="btn-floating btn-large waves-effect waves-light green">
+                        <i class="material-icons">alarm</i>
+                    </a>
+                    <a href="#!" class="btn-floating btn-large waves-effect waves-light green">
+                        <i class="material-icons">android</i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
     <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.100.2/js/materialize.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/4.3.1/firebase.js"></script>
@@ -105,9 +187,9 @@
     <script src="assets/js/app-controller.js" charset="utf-8"></script>
     <script type="text/javascript">
         $(".modal").modal({ dismissible: false });
-        var model = new Model();
-        var appController = new AppController(model);
-        model.Ignite();
+        // var model = new Model();
+        // var appController = new AppController(model);
+        // model.Ignite();
     </script>
     </body>
 </html>
