@@ -13,20 +13,25 @@ var AppController = function(model) {
     });
 
     this.model.RegisterCallback("requests", function(diffs) {
-        if (self.model.PlayerStatus === "in-game") { return; }
-        var considerSnapshot = self.consideringMatchWith;
-        if (diffs instanceof Object) {
-            for (var uid in diffs.removed) {
-                if (uid === self.consideringMatchWith) {
-                    self.consideringMatchWith = "";
-                }
+        if (self.model.PlayerStatus === "in-game") {
+            var union = UnionObjects(diffs.added, diffs.updated);
+            union = UnionObjects(union, diffs.unchanged);
+            for (var uid in union) {
+                self.model.RespondToChallenge(uid, false);
             }
-            for (var uid in UnionObjects(diffs.added, diffs.unchanged)) {
-                if (self.consideringMatchWith === "") {
-                    self.consideringMatchWith = uid;
-                } else {
-                    // Add to queue
-                }
+            return;
+        }
+        var considerSnapshot = self.consideringMatchWith;
+        for (var uid in diffs.removed) {
+            if (uid === self.consideringMatchWith) {
+                self.consideringMatchWith = "";
+            }
+        }
+        for (var uid in UnionObjects(diffs.added, diffs.unchanged)) {
+            if (self.consideringMatchWith === "") {
+                self.consideringMatchWith = uid;
+            } else {
+                // Add to queue
             }
         }
         if (considerSnapshot.length === 0 && self.consideringMatchWith.length > 0) {
