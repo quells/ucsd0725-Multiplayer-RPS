@@ -11,3 +11,42 @@ h1 {
     font-weight: 300;
     margin-bottom: 30px;
 }
+
+.btn-huge {
+    width: 96px;
+    height: 96px;
+}
+
+#chatWindow {
+    max-width: 100%;
+    height: 25vw;
+    min-height: 12em;
+    border: 1px solid #ccc;
+    overflow-y: scroll;
+}
+
+.chat-bubble {
+    padding: 12px;
+    margin: 12px;
+    border-radius: 50px;
+    color: #fff;
+    text-align: left;
+}
+
+.chat-bubble i { font-size: 2rem; }
+
+@media (min-width: 400px) {
+    .chat-bubble i { font-size: 3rem; }
+}
+
+.bubble-left {
+    padding-left: 24px;
+    margin-right: 40%;
+    background: #42a5f5;
+}
+
+.bubble-right {
+    padding-right: 24px;
+    margin-left: 40%;
+    background: #9e9e9e;
+}
