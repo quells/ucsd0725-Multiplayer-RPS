@@ -81,7 +81,6 @@ var AppController = function(model) {
                 self.model.RemoveResponses(response);
                 if (response) {
                     // Start game
-                    // console.log("start game, challeng-er");
                     self.viewController.TransitionTo("game");
                     self.model.StartGame(uid);
                 }
@@ -90,13 +89,9 @@ var AppController = function(model) {
         }
     });
 
-    this.model.RegisterCallback("game", function(diffs) {
-        console.log(diffs);
-    });
-
-    this.viewController.RegisterClickCallback(".challengePlayer", function(t, e) {
+    this.viewController.RegisterClickCallback(".challengePlayer", function(e) {
         if (self.model.PlayerStatus !== "lobby") { return; }
-        t = $(t);
+        var t = $(this);
         // Cannot challenge players who are 'waiting' or 'in-game'
         if (t.hasClass("tooltipped")) { return; }
         var otherUID = t.data("uid");
@@ -107,14 +102,13 @@ var AppController = function(model) {
         self.model.ChallengePlayer(otherUID);
     });
 
-    this.viewController.RegisterClickCallback(".btn-challenge", function(t, e) {
-        t = $(t);
+    this.viewController.RegisterClickCallback(".btn-challenge", function(e) {
+        var t = $(this);
         var otherUID = t.data("uid");
         var action = t.attr("id");
         switch (action) {
             case "acceptChallenge":
                 self.model.RespondToChallenge(otherUID, true);
-                // console.log("start game, challeng-ee")
                 self.viewController.TransitionTo("game");
                 break;
             case "declineChallenge":

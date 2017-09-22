@@ -20,30 +20,11 @@ var ViewController = function(playerName) {
     var self = this;
 
     // Callbacks
-    this.clickCallbacks = {};
     this.RegisterClickCallback = function(target, callback) {
         if (target === undefined) { return; }
         if (callback === undefined) { return; }
-        var callbacks = self.clickCallbacks[target] || {index: 0};
-
-        var i = callbacks.index;
-        callbacks[i] = callback;
-        callbacks.index = i + 1;
-        self.clickCallbacks[target] = callbacks;
+        $(document).on("click", target, callback);
     };
-    $(document).on("click", function(event) {
-        // Potential to be performance bottleneck...
-        var target = $(event.target);
-        for (var t in self.clickCallbacks) {
-            if (target.is(t)) {
-                for (var p in self.clickCallbacks[t]) {
-                    if (p === "index") { continue; }
-                    var callback = self.clickCallbacks[t][p];
-                    callback(target, event);
-                }
-            }
-        }
-    })
 
     // OtherPlayers List
     this.AddPlayers = function(players) {
