@@ -90,9 +90,7 @@ var AppController = function(model) {
                 self.viewController.DisplayResponseToChallenge(otherPlayerName, response);
                 self.model.RemoveResponses(response);
                 if (response) {
-                    // Start game
-                    self.viewController.TransitionTo("game");
-                    self.model.StartGame(uid);
+                    self.startGame(uid);
                 }
                 return;
             }
@@ -118,8 +116,9 @@ var AppController = function(model) {
         var action = t.attr("id");
         switch (action) {
             case "acceptChallenge":
+                // Start game
                 self.model.RespondToChallenge(otherUID, true);
-                self.viewController.TransitionTo("game");
+                self.startGame(otherUID);
                 break;
             case "declineChallenge":
                 self.model.RespondToChallenge(otherUID, false);
@@ -134,36 +133,57 @@ var AppController = function(model) {
 
     // In-Game
 
-    this.model.RegisterCallback("game", function(diffs) {
-        for (var p in diffs.removed) {
-            if (p === "opponent") {
-                if (self.leftFirst) {
-                    self.leftFirst = false;
-                } else {
-                    var opponentName = self.model.GetPlayerName(self.model.OpponentUID);
-                    self.viewController.ShowNotification(opponentName + "has left the game.", function() {
-                        $("#gameHeading").text("Game Over");
-                    });
-                }
+    this.startGame = function(otherUID) {
+        var otherPlayer = self.model.GetPlayerName(otherUID, false);
+        var color = otherPlayer.split(".")[0];
+        self.viewController.SetGameHeading("Match Against " + ParsePlayerName(otherPlayer));
+        self.viewController.SetGameHeaderColor(color);
+        self.viewController.TransitionTo("game");
+        self.model.StartGame(otherUID);
+    };
+
+    this.handleMoves = function() {
+        var handled = self.model.HandleMoves();
+        if (handled !== undefined) {
+            self.viewController.ResetMoves();
+            var moves = ["Rock", "Paper", "Scissors"];
+            var ownMove = moves[handled.ownMove];
+            var oppMove = moves[handled.opponentMove];
+            var oppName = self.model.GetPlayerName(self.model.OpponentUID);
+            var message = "You chose " + ownMove + ".<br>" + oppName + " chose " + oppMove + ".<br>";
+            switch (handled.outcome) {
+                case -1:
+                    message += "You lost.";
+                    break;
+                case 0:
+                    message += "It was a tie.";
+                    break;
+                case 1:
+                    message += "You won!";
+                    break;
             }
+            self.viewController.SetCaption(message);
+            self.viewController.SetGamePrompt("Select a Symbol");
+            self.viewController.UpdateStatistics(self.model.game["wins"], self.model.game["losses"], self.model.game["ties"]);
         }
-        console.log("game", diffs);
+    };
+
+    this.model.RegisterCallback("notifications", function(diffs) {
+        switch (self.model.PlayerStatus) {
+            case "in-game":
+                for (var p in diffs.added) {
+                    self.model.ReceiveOpponentMove(diffs.added[p], p);
+                }
+                self.handleMoves();
+                break;
+            default: break;
+        }
     });
 
-    this.model.RegisterCallback("opponent", function(diffs) {
-        for (var p in diffs.removed) {
-            if (p === "name") {
-                if (self.leftFirst) {
-                    self.leftFirst = false;
-                } else {
-                    var opponentName = self.model.GetPlayerName(self.model.OpponentUID);
-                    self.viewController.ShowNotification(opponentName + "has left the game.", function() {
-                        $("#gameHeading").text("Game Over");
-                    });
-                }
-            }
-        }
-        console.log("opponent", diffs);
+    this.model.RegisterCallback("opponentDisconnected", function(diffs) {
+        var opponentName = diffs.removed.name;
+        self.viewController.SetGameHeading("Game Over");
+        self.viewController.ShowNotification(opponentName + " has disconnected.");
     });
 
     this.viewController.RegisterClickCallback("#backToLobby", function(e) {
@@ -173,7 +193,26 @@ var AppController = function(model) {
     });
 
     this.viewController.RegisterClickCallback(".btn-move", function(e) {
-        var move = $(this).data("move");
-        console.log(move);
+        if (!self.model.CanMakeMove()) { return; }
+        var t = $(this);
+        var move = t.data("move");
+        var opponentName = self.model.GetPlayerName(self.model.OpponentUID);
+        self.viewController.SelectMove(t);
+        self.viewController.SetGamePrompt("Waiting for " + opponentName);
+        switch (move) {
+            case "rock":
+                self.model.MakeMove(0);
+                break;
+            case "paper":
+                self.model.MakeMove(1);
+                break;
+            case "scissors":
+                self.model.MakeMove(2);
+                break;
+            default:
+                throw new Error("AppController.click.btn-move error: unknown move " + move);
+        }
+        self.viewController.SetCaption("");
+        self.handleMoves();
     });
 }

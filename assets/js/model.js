@@ -16,7 +16,6 @@ var Model = function() {
     this.requests = {};     // User's Requests
     this.responses = {};    // User's Responses
     this.game = {};         // User's Game
-    this.opponent = {};
 
     // Local Data
     this.UID = "";
@@ -32,8 +31,8 @@ var Model = function() {
         "otherPlayers": {index: 0},
         "requests": {index: 0},
         "responses": {index: 0},
-        "game": {index: 0},
-        "opponent": {index: 0}
+        "opponentDisconnected": {index: 0},
+        "notifications": {index: 0}
     };
     // Dynamic self-modification! WooooOOOOoooo
     this.RegisterCallback = function(target, callback) {
@@ -65,11 +64,10 @@ var Model = function() {
         }
     };
 
-    this.GetPlayerName = function(uid) {
-        if (this.connections[uid] === undefined) {
-            return "Unknown Player";
-        }
-        return ParsePlayerName(this.connections[uid].name);
+    this.GetPlayerName = function(uid, parsed) {
+        if (this.connections[uid] === undefined) { return "Unknown Player"; }
+        if (parsed === undefined) { parsed = true; }
+        return parsed ? ParsePlayerName(this.connections[uid].name) : this.connections[uid].name;
     };
 
     this.SetOwnStatus = function(status) {
@@ -104,25 +102,73 @@ var Model = function() {
     };
     this.StartGame = function(otherUID) {
         self.OpponentUID = otherUID;
-        self.database.ref("/connections").child(self.UID).child("game").set({
+        self.game = {
             "wins": 0,
             "losses": 0,
             "ties": 0,
             "opponent": otherUID
-        });
+        };
         self.database.ref("/connections").child(otherUID).on("value", function(snapshot) {
-            snapshot = snapshot.val() || {};
-            var diffs = DiffObjects(self.opponent, snapshot);
-            self.fireCallbacks("opponent", diffs);
-            self.opponent = snapshot;
+            if (snapshot.val() === null) {
+                self.fireCallbacks("opponentDisconnected", DiffObjects({"uid": self.OpponentUID, "name": self.GetPlayerName(self.OpponentUID)}, {}));
+            }
         });
     };
     this.ExitGame = function() {
-        self.database.ref("/connections").child(self.OpponentUID).off();
-        self.database.ref("/connections").child(self.OpponentUID).child("game").child("opponent").remove();
-        self.database.ref("/connections").child(self.UID).child("game").remove();
         self.OpponentUID = "";
+        self.game = {};
         self.SetOwnStatus("lobby");
+    };
+    this.CanMakeMove = function() {
+        return (self.game["own-move"] === undefined);
+    };
+    this.MakeMove = function(move) {
+        self.game["own-move"] = move;
+        self.database.ref("/connections").child(self.OpponentUID).child("notifications").push(move);
+    };
+    this.ReceiveOpponentMove = function(move, keyToRemove) {
+        self.game["opponent-move"] = move;
+        self.database.ref("/connections").child(self.UID).child("notifications").child(keyToRemove).remove();
+    }
+    this.ResetMoves = function() {
+        delete self.game["own-move"];
+        delete self.game["opponent-move"];
+    };
+    this.HandleMoves = function() {
+        var ownMove = self.game["own-move"];
+        var opponentMove = self.game["opponent-move"];
+        //   R P S
+        // R D L W
+        // P W D L
+        // S L W D
+        var outcomeMap = [
+            [0, -1, 1],
+            [1, 0, -1],
+            [-1, 1, 0]
+        ];
+        if ((ownMove !== undefined) && (opponentMove !== undefined)) {
+            var outcome = outcomeMap[ownMove][opponentMove];
+            self.ResetMoves();
+            switch (outcome) {
+                case -1:
+                    self.game.losses = self.game.losses + 1;
+                    break;
+                case 0:
+                    self.game.ties = self.game.ties + 1;
+                    break;
+                case 1:
+                    self.game.wins = self.game.wins + 1;
+                    break;
+                default:
+                    throw new Error("Model.HandleMoves error: unknown outcome " + ownMove + " " + opponentMove);
+            }
+            return {
+                "ownMove": ownMove,
+                "opponentMove": opponentMove,
+                "outcome": outcome
+            };
+        }
+        return undefined;
     };
 
     this.isLit = false;
@@ -195,11 +241,10 @@ var Model = function() {
                     self.responses = snapshot;
                 });
 
-                con.child("game").on("value", function(snapshot) {
+                con.child("notifications").on("value", function(snapshot) {
                     snapshot = snapshot.val() || {};
-                    var diffs = DiffObjects(self.game, snapshot);
-                    self.fireCallbacks("game", diffs);
-                    self.game = snapshot;
+                    var diffs = DiffObjects({}, snapshot);
+                    self.fireCallbacks("notifications", diffs);
                 });
             }
         });

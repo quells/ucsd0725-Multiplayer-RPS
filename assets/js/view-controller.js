@@ -53,20 +53,25 @@ var ViewController = function(playerName) {
             $("#otherPlayers > ul").append(listItem);
         }
     };
+    this.removeColorTextClasses = function (i, n) {
+        var cs = [];
+        n.split(" ").forEach(function(c) { if (c.slice(c.length-4) === "text") { cs.push(c); } });
+        return cs.join(" ");
+    };
+    this.removeColorClasses = function(i, n) {
+        var cs = [];
+        n.split(" ").forEach(function(c) { if ($.inArray(c, RN_Colors) > 0) { cs.push(c); } });
+        return cs.join(" ");
+    }
     this.UpdatePlayers = function(players) {
-        var removeColorClasses = function (i, n) {
-            var cs = [];
-            n.split(" ").forEach(function(c) { if (c.slice(c.length-4) === "text") { cs.push(c); } });
-            return cs.join(" ");
-        }
         for (var uid in players) {
             var link = $("#" + uid + " > a");
-            link.removeClass(removeColorClasses);
+            link.removeClass(self.removeColorTextClasses);
             link.addClass(self.colorCode[players[uid].status]);
             link.removeClass("tooltipped");
             link.tooltip("remove");
             var icon = $("#" + uid + " > a > span > i");
-            icon.removeClass(removeColorClasses);
+            icon.removeClass(self.removeColorTextClasses);
             icon.addClass(self.colorCode[players[uid].status]);
             icon.text(self.shapeCode[players[uid].status]);
             if (players[uid].status !== "lobby") {
@@ -136,6 +141,7 @@ var ViewController = function(playerName) {
         }, 1000);
     };
 
+    // General
     this.TransitionTo = function(screen) {
         switch (screen) {
             case "game":
@@ -150,14 +156,43 @@ var ViewController = function(playerName) {
                 throw new Error("ViewController.TransitionTo error: unknown screen " + screen);
         }
     };
-    this.ShowNotification = function(message, callback) {
+    this.ShowNotification = function(message) {
         $("#notification > .modal-content > h4").html(message);
         $("#notification").modal("open");
         setTimeout(function() {
             $("#notification").modal("close");
-            callback();
-        }, 1000);
+        }, 1500);
     };
 
     // Game Screen
+    this.SetGameHeading = function(message) {
+        $("#gameHeading").html(message);
+    };
+    this.SetGameHeaderColor = function(color) {
+        var header = $("#gameHeader");
+        header.removeClass(self.removeColorClasses);
+        header.addClass(color);
+        var backButton = $("#gameHeader > div > a");
+        backButton.removeClass(self.removeColorClasses);
+        backButton.addClass(color);
+    };
+    this.SetGamePrompt = function(message) {
+        $("#gamePrompt").html(message);
+    };
+    this.SelectMove = function(target) {
+        target.removeClass("blue").addClass("amber");
+    };
+    this.ResetMoves = function() {
+        $(".btn-move").removeClass("amber").addClass("blue");
+    };
+    this.SetCaption = function(message) {
+        $("#gameCommentary > p").html(message);
+    };
+    this.UpdateStatistics = function(wins, losses, ties) {
+        var row = $("#winsLosses");
+        row.empty();
+        $("<td>").text(wins).appendTo(row);
+        $("<td>").text(losses).appendTo(row);
+        $("<td>").text(ties).appendTo(row);
+    }
 }
