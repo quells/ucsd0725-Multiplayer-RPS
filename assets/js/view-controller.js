@@ -154,4 +154,21 @@ var ViewController = function(playerName) {
             $("#challenge").modal("close");
         }, 1000);
     };
+
+    this.TransitionTo = function(screen) {
+        switch (screen) {
+            case "game":
+                $("#lobby").addClass("hide");
+                $("#game").removeClass("hide");
+                break;
+            case "lobby":
+                $("#game").addClass("hide");
+                $("#lobby").removeClass("hide");
+                break;
+            default:
+                throw new Error("ViewController.TransitionTo error: unknown screen " + screen);
+        }
+    }
+
+    // Game Screen
 }

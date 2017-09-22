@@ -22,6 +22,7 @@ var Model = function() {
     this.PlayerName = RandomName();
     this.PlayerStatus = "lobby";
     this.OtherPlayers = {};
+    this.Opponent = "";
     var self = this;
 
     // Callbacks
@@ -51,7 +52,6 @@ var Model = function() {
         if (target === undefined) { return; }
         if (diffs === undefined) { return; }
 
-        // target = target + "Callbacks";
         if (self.callbacks[target] === undefined) {
             throw new Error("Model.fireCallback error: unknown target " + target);
         }
@@ -87,11 +87,7 @@ var Model = function() {
         self.database.ref("/connections").child(otherUID).child("responses").child(self.UID).set(response);
         if (response) {
             self.SetOwnStatus("in-game");
-            self.database.ref("/connections").child(self.UID).child("game").set({
-                "wins": 0,
-                "losses": 0,
-                "ties": 0
-            })
+            self.StartGame(otherUID);
         } else {
             self.SetOwnStatus("lobby");
         }
@@ -103,6 +99,14 @@ var Model = function() {
         } else {
             self.SetOwnStatus("lobby");
         }
+    };
+    this.StartGame = function(otherUID) {
+        self.opponent = otherUID;
+        self.database.ref("/connections").child(self.UID).child("game").set({
+            "wins": 0,
+            "losses": 0,
+            "ties": 0
+        });
     };
 
     this.isLit = false;

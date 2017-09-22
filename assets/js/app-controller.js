@@ -81,11 +81,17 @@ var AppController = function(model) {
                 self.model.RemoveResponses(response);
                 if (response) {
                     // Start game
-                    console.log("start game, challeng-er")
+                    // console.log("start game, challeng-er");
+                    self.viewController.TransitionTo("game");
+                    self.model.StartGame(uid);
                 }
                 return;
             }
         }
+    });
+
+    this.model.RegisterCallback("game", function(diffs) {
+        console.log(diffs);
     });
 
     this.viewController.RegisterClickCallback(".challengePlayer", function(t, e) {
@@ -108,7 +114,8 @@ var AppController = function(model) {
         switch (action) {
             case "acceptChallenge":
                 self.model.RespondToChallenge(otherUID, true);
-                console.log("start game, challeng-ee")
+                // console.log("start game, challeng-ee")
+                self.viewController.TransitionTo("game");
                 break;
             case "declineChallenge":
                 self.model.RespondToChallenge(otherUID, false);
