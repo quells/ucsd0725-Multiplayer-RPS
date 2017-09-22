@@ -15,14 +15,15 @@ var Model = function() {
     this.connections = {};  // All Connections
     this.requests = {};     // User's Requests
     this.responses = {};    // User's Responses
-    this.game = {};         // User's Game (belongs to challenger)
+    this.game = {};         // User's Game
+    this.opponent = {};
 
     // Local Data
     this.UID = "";
     this.PlayerName = RandomName();
     this.PlayerStatus = "lobby";
     this.OtherPlayers = {};
-    this.Opponent = "";
+    this.OpponentUID = "";
     var self = this;
 
     // Callbacks
@@ -31,7 +32,8 @@ var Model = function() {
         "otherPlayers": {index: 0},
         "requests": {index: 0},
         "responses": {index: 0},
-        "game": {index: 0}
+        "game": {index: 0},
+        "opponent": {index: 0}
     };
     // Dynamic self-modification! WooooOOOOoooo
     this.RegisterCallback = function(target, callback) {
@@ -101,12 +103,26 @@ var Model = function() {
         }
     };
     this.StartGame = function(otherUID) {
-        self.opponent = otherUID;
+        self.OpponentUID = otherUID;
         self.database.ref("/connections").child(self.UID).child("game").set({
             "wins": 0,
             "losses": 0,
-            "ties": 0
+            "ties": 0,
+            "opponent": otherUID
         });
+        self.database.ref("/connections").child(otherUID).on("value", function(snapshot) {
+            snapshot = snapshot.val() || {};
+            var diffs = DiffObjects(self.opponent, snapshot);
+            self.fireCallbacks("opponent", diffs);
+            self.opponent = snapshot;
+        });
+    };
+    this.ExitGame = function() {
+        self.database.ref("/connections").child(self.OpponentUID).off();
+        self.database.ref("/connections").child(self.OpponentUID).child("game").child("opponent").remove();
+        self.database.ref("/connections").child(self.UID).child("game").remove();
+        self.OpponentUID = "";
+        self.SetOwnStatus("lobby");
     };
 
     this.isLit = false;

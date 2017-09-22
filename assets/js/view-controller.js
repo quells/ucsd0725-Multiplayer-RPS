@@ -149,7 +149,15 @@ var ViewController = function(playerName) {
             default:
                 throw new Error("ViewController.TransitionTo error: unknown screen " + screen);
         }
-    }
+    };
+    this.ShowNotification = function(message, callback) {
+        $("#notification > .modal-content > h4").html(message);
+        $("#notification").modal("open");
+        setTimeout(function() {
+            $("#notification").modal("close");
+            callback();
+        }, 1000);
+    };
 
     // Game Screen
 }

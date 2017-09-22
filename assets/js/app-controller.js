@@ -4,6 +4,7 @@ var AppController = function(model) {
     this.viewController = new ViewController(this.model.PlayerName);
 
     this.consideringMatchWith = "";
+    this.leftFirst = false;
 
     this.model.RegisterCallback("otherPlayers", function(diffs) {
         self.viewController.RemovePlayers(diffs.removed);
@@ -36,31 +37,40 @@ var AppController = function(model) {
         }
         if (considerSnapshot.length === 0 && self.consideringMatchWith.length > 0) {
             // New Challenge
-            var otherPlayerName = self.model.GetPlayerName(self.consideringMatchWith);
-            self.viewController.ModalForChallengeFromPlayer(otherPlayerName, self.consideringMatchWith);
-            self.model.SetOwnStatus("waiting");
+            if (self.model.PlayerStatus === "lobby") {
+                var otherPlayerName = self.model.GetPlayerName(self.consideringMatchWith);
+                self.viewController.ModalForChallengeFromPlayer(otherPlayerName, self.consideringMatchWith);
+                self.model.SetOwnStatus("waiting");
+            }
         } else if (considerSnapshot.length > 0 && self.consideringMatchWith.length > 0) {
             if (considerSnapshot !== self.consideringMatchWith) {
                 // Different Challenge (not sure this will ever happen, but...)
-                console.log("one in a million?");
-                var oldPlayerName = self.model.GetPlayerName(considerSnapshot);
-                var otherUID = self.consideringMatchWith;
-                var otherPlayerName = self.model.GetPlayerName(otherUID);
-                self.viewController.CancelChallengeFromPlayer(oldPlayerName);
-                self.model.SetOwnStatus("waiting");
-                setTimeout(function() {
-                    self.viewController.ModalForChallengeFromPlayer(otherPlayerName, otherUID)
-                }, 1500);
+                if (self.model.PlayerStatus === "waiting") {
+                    console.log("one in a million?");
+                    var oldPlayerName = self.model.GetPlayerName(considerSnapshot);
+                    var otherUID = self.consideringMatchWith;
+                    var otherPlayerName = self.model.GetPlayerName(otherUID);
+                    self.viewController.CancelChallengeFromPlayer(oldPlayerName);
+                    self.model.SetOwnStatus("waiting");
+                    setTimeout(function() {
+                        self.viewController.ModalForChallengeFromPlayer(otherPlayerName, otherUID)
+                    }, 1500);
+                }
             } else {
                 // Bug here
             }
         } else if (considerSnapshot.length > 0 && self.consideringMatchWith.length === 0) {
             // Cancelled Challenge
-            var otherPlayerName = self.model.GetPlayerName(considerSnapshot);
-            self.viewController.CancelChallengeFromPlayer(otherPlayerName);
-            setTimeout(function() {
-                self.model.SetOwnStatus("lobby");
-            }, 1500);
+            if (self.model.PlayerStatus === "waiting") {
+                var otherPlayerName = self.model.GetPlayerName(considerSnapshot);
+                self.viewController.CancelChallengeFromPlayer(otherPlayerName);
+                setTimeout(function() {
+                    if (self.model.PlayerStatus === "waiting") {
+                        console.log("cancelled challenge");
+                        self.model.SetOwnStatus("lobby");
+                    }
+                }, 1500);
+            }
             // Pull from queue
         }
     });
@@ -120,5 +130,50 @@ var AppController = function(model) {
             default:
                 throw new Error("AppController.clickCallback error: unknown button action " + action);
         }
+    });
+
+    // In-Game
+
+    this.model.RegisterCallback("game", function(diffs) {
+        for (var p in diffs.removed) {
+            if (p === "opponent") {
+                if (self.leftFirst) {
+                    self.leftFirst = false;
+                } else {
+                    var opponentName = self.model.GetPlayerName(self.model.OpponentUID);
+                    self.viewController.ShowNotification(opponentName + "has left the game.", function() {
+                        $("#gameHeading").text("Game Over");
+                    });
+                }
+            }
+        }
+        console.log("game", diffs);
+    });
+
+    this.model.RegisterCallback("opponent", function(diffs) {
+        for (var p in diffs.removed) {
+            if (p === "name") {
+                if (self.leftFirst) {
+                    self.leftFirst = false;
+                } else {
+                    var opponentName = self.model.GetPlayerName(self.model.OpponentUID);
+                    self.viewController.ShowNotification(opponentName + "has left the game.", function() {
+                        $("#gameHeading").text("Game Over");
+                    });
+                }
+            }
+        }
+        console.log("opponent", diffs);
+    });
+
+    this.viewController.RegisterClickCallback("#backToLobby", function(e) {
+        self.leftFirst = true;
+        self.model.ExitGame();
+        self.viewController.TransitionTo("lobby");
+    });
+
+    this.viewController.RegisterClickCallback(".btn-move", function(e) {
+        var move = $(this).data("move");
+        console.log(move);
     });
 }
